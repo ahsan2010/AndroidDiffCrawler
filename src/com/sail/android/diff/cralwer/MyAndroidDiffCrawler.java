@@ -93,7 +93,7 @@ public class MyAndroidDiffCrawler {
 		try {
 			WebElement codeElement = driver.findElement(By.xpath("//*[@id='mainBodyFluid']"));
 			List<WebElement> listTableElements = driver
-					.findElements(By.xpath("//table[@summary='Changed Fields']//tr"));
+					.findElements(By.xpath("//table[@summary='Added Methods']//tr"));
 			/*for (WebElement element2 : listTableElements) {
 
 				System.out.println("TR: " + element2.getAttribute("innerHTML"));
@@ -102,12 +102,16 @@ public class MyAndroidDiffCrawler {
 			
 			WebElement secondElement = listTableElements.get(1);
 			System.out.println(secondElement.getAttribute("innerHTML"));
-			List<WebElement> listTd = secondElement.findElements(By.xpath(".//td[@valign='TOP']//a"));
+			List<WebElement> listTd = secondElement.findElements(By.xpath(".//td[@valign='TOP']//nobr//a"));
 			
-			for(WebElement element2 : listTd){
-				System.out.println(element2.getAttribute("href"));
+				String methodUrl = listTd.get(0).getAttribute("href");
+				methodUrl = methodUrl.substring(methodUrl.lastIndexOf("#")+1);
+				
+				String methodName = methodUrl.substring(0,methodUrl.indexOf("("));
+				String parameters = methodUrl.substring(methodUrl.indexOf("(")).replace("(","").replace(")", "");
+				
+				System.out.println("Method URL: " + methodUrl +" Method Name: " + methodName +" Parameters: " + parameters);
 				System.out.println("-------------------");
-			}
 			
 
 		} catch (Exception e) {
