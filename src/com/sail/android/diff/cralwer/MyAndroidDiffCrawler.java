@@ -33,45 +33,46 @@ public class MyAndroidDiffCrawler {
 	}
 	
 	
-	public Map<String,ArrayList<ClassChangeInfo>> extractChangeInfo(WebElement changeTypeWebElement, WebDriver driver){
-		Map<String,ArrayList<ClassChangeInfo>> changeInfo = new HashMap<String,ArrayList<ClassChangeInfo>>();
-		
-		for(String changeType : changedTypeList){
+	public Map<String, ArrayList<ClassChangeInfo>> extractChangeInfo(WebElement changeTypeWebElement,
+			WebDriver driver) {
+		Map<String, ArrayList<ClassChangeInfo>> changeInfo = new HashMap<String, ArrayList<ClassChangeInfo>>();
+
+		for (String changeType : changedTypeList) {
+
 			changeInfo.put(changeType, new ArrayList<ClassChangeInfo>());
 		}
-			
-			for(int i = 0 ; i < changedTypeList.size() ; i ++){
-				String changeType = changedTypeList.get(i);
-				try{
-					List<WebElement> listTableElements = driver
-							.findElements(By.xpath("//table[@summary='"+changeType+"']//tr"));
-					for(int j = 0 ; j < listTableElements.size() ; j ++){
-						WebElement tableElement = listTableElements.get(j);
-						try{
-							List<WebElement> listTd = tableElement.findElements(By.xpath(".//td[@valign='TOP']"));
-							List<WebElement> codes = listTd.get(0).findElements(By.xpath("..//nobr//code"));
-							
-							
-						}catch(Exception e){
-							e.printStackTrace();
-						}
+
+		for (int i = 0; i < changedTypeList.size(); i++) {
+
+			String changeType = changedTypeList.get(i);
+			try {
+				List<WebElement> listTableElements = driver
+						.findElements(By.xpath("//table[@summary='" + changeType + "']//tr"));
+				for (int j = 0; j < listTableElements.size(); j++) {
+					WebElement tableElement = listTableElements.get(j);
+					try {
+						List<WebElement> listTd = tableElement.findElements(By.xpath(".//td[@valign='TOP']"));
+						
+						String methodUrl = listTd.get(0).getAttribute("href");
+						methodUrl = methodUrl.substring(methodUrl.lastIndexOf("#")+1);
+						
+						String methodName = methodUrl.substring(0,methodUrl.indexOf("("));
+						String parameters = methodUrl.substring(methodUrl.indexOf("(")).replace("(","").replace(")", "");
+						
+						
+						
+						
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				}catch(Exception e){
-					e.printStackTrace();
 				}
-				
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-			
-			
-			
-			
-		
-		
-		
+
+		}
 		return changeInfo;
 	}
-	
 	
 	public void crawlingData() throws Exception{
 		
@@ -103,6 +104,7 @@ public class MyAndroidDiffCrawler {
 			WebElement secondElement = listTableElements.get(1);
 			System.out.println(secondElement.getAttribute("innerHTML"));
 			List<WebElement> listTd = secondElement.findElements(By.xpath(".//td[@valign='TOP']//nobr//a"));
+			System.out.println("SIZE: " + listTd.size());
 			
 				String methodUrl = listTd.get(0).getAttribute("href");
 				methodUrl = methodUrl.substring(methodUrl.lastIndexOf("#")+1);
