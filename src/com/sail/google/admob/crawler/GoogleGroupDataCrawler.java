@@ -14,8 +14,6 @@ public class GoogleGroupDataCrawler {
 	WebDriver pageDriver = null;
 	
 	public void setDriverProperty() {
-		//System.setProperty("webdriver.gecko.driver",
-		//		"/home/ahsan/Documents/ResearchBD/PC_Research/RecommendPost/IssueCrawler/resources/geckodriver");
 		//System.setProperty("webdriver.chrome.driver", "/home/ahsan/Downloads/chromedriver");
 		System.setProperty("webdriver.gecko.driver", "/home/ahsan/Downloads/Lib/geckodriver");
 	}
