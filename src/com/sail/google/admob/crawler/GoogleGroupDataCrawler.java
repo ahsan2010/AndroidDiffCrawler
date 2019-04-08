@@ -2,11 +2,17 @@ package com.sail.google.admob.crawler;
 
 import java.util.List;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 public class GoogleGroupDataCrawler {
 
@@ -14,8 +20,7 @@ public class GoogleGroupDataCrawler {
 	WebDriver pageDriver = null;
 	
 	public void setDriverProperty() {
-		//System.setProperty("webdriver.chrome.driver", "/home/ahsan/Downloads/chromedriver");
-		System.setProperty("webdriver.gecko.driver", "/home/ahsan/Downloads/Lib/geckodriver");
+		System.setProperty("webdriver.gecko.driver", "/home/ahsan/Documents/Sail_Research/AndroidDiffCrawler/geckodriver");
 	}
 
 	public List<WebElement> getChangeTableInfo(WebDriver driver, String type) {
@@ -47,17 +52,90 @@ public class GoogleGroupDataCrawler {
 	public void getPageInformation(String url) throws Exception{
 		pageDriver.get(url);
 		Thread.sleep(3000);
-		List<WebElement> pageThreads 	= pageDriver.findElements(By.xpath("//div[contains(@class, 'F0XO1GC-nb-W F0XO1GC-nb-Y'))"));
-		//List<WebElement> pageThreads 	= pageDriver.findElements(By.className("F0XO1GC-nb-W F0XO1GC-nb-Y F0XO1GC-b-Gb F0XO1GC-nb-X"));
+		JavascriptExecutor js = (JavascriptExecutor) pageDriver;
+		//js.executeScript("return document.getElementsByClassName('F0XO1GC-Db-b').remove();");"F0XO1GC-nb-W F0XO1GC-mb-p"
+		List<WebElement> pageThreads 	= pageDriver.findElements(By.xpath("//div[contains(@class,'F0XO1GC-nb-W F0XO1GC-mb-p')]"));
+		//List<WebElement> pageThreads 	= pageDriver.findElements(By.className("F0XO1GC-nb-P"));
+		System.out.println("SIZE: " + pageThreads.size());
+		List<WebElement> elements = pageThreads.get(1).findElements(By.className("F0XO1GC-nb-P"));
+		WebElement element = pageThreads.get(1);
+		//System.out.println(element.getAttribute("innerHTML"));
 		
-		System.out.println(pageThreads.size());
+		for(WebElement el : elements){
+			System.out.println(el.getAttribute("innerHTML"));
+		}
+		
+		/*for(WebElement element : pageThreads){			
+			//WebElement dateElement = element.findElement(By.xpath("//span[contains(@class, 'F0XO1GC-nb-Q F0XO1GC-b-Fb')]"));
+			System.out.println(element.getAttribute("innerHTML"));
+		//	System.out.println(element.getText());
+			//System.out.println(dateElement.getText());
+			System.out.println("---------------------------------------");
+			System.out.println("---------------------------------------");
+			
+		}*/
+		
 	}
 	
+	public void getPageInformationII(String url) throws Exception{
+		pageDriver.get(url);
+		Thread.sleep(3000);
+		String htmlContent = pageDriver.getPageSource();
+		//System.out.println(htmlContent);
+		Document doc = Jsoup.parse(htmlContent);
+		List<Element> docElements = doc.select("div.F0XO1GC-nb-x");
+		for(int i = 1 ; i < docElements.size() ; i ++ ){
+			Element p = docElements.get(i);
+			Elements el = p.select("blockquote");
+			if(el != null){
+				el.remove();
+			}
+			String text = p.text();
+			//System.out.println(text.indexOf(":"));
+			text = text.substring(text.indexOf(":") + 1);
+			
+			//System.out.println(text);
+			//System.out.println("------------------------");
+			
+			for(Element filteredText : p.select("div[dir='ltr']")){
+				System.out.println("V:  " + filteredText.text());
+				System.out.println("----------------------");
+			}
+			
+			String previous = "";
+			String timeString = "";
+			String posterName = "";
+			for( Element element : p.getAllElements() )
+			{
+			    for( Attribute attribute : element.attributes() )
+			    {
+			    	if(attribute.getValue().equals("F0XO1GC-F-a")){
+			    		posterName = element.text();
+			    	}
+			    	if(attribute.getValue().equals("F0XO1GC-nb-Q F0XO1GC-b-Fb")){
+			    		timeString = element.attr("title");
+			    		
+			    	}
+			        if( attribute.getValue().equalsIgnoreCase("ltr") )
+			        {			            
+			            if(previous.equals(element.text())){
+			            	continue;
+			            }
+			            System.out.println( timeString + " " + posterName +  " V "+ element.text());
+			            System.out.println("----------------------");
+			            previous = element.text();
+			        }
+			    }
+			}
+		}
+	}
 	
 	public void crawlingData() throws Exception {
 		setDriverProperty();
-		pageDriver = new FirefoxDriver();
-		driver = new FirefoxDriver();
+		FirefoxOptions  options = new FirefoxOptions();
+		options.addArguments("headless");
+		pageDriver = new FirefoxDriver(options);
+		driver = new FirefoxDriver(options);
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 		driver.get("https://groups.google.com/forum/#!categories/google-admob-ads-sdk");
 		Thread.sleep(1000);
@@ -68,8 +146,7 @@ public class GoogleGroupDataCrawler {
 			//js.executeAsyncScript(arg0, arg1)
 			js.executeScript("window.scrollTo(0,document.body.scrollHeight)");
 			//js.executeScript("alert('PROBLEM PROBEM')");
-			js.executeScript("arguments[0].scrollBy(0,arguments[0].scrollHeight);", scrollbarElement);
-			
+			js.executeScript("arguments[0].scrollBy(0,arguments[0].scrollHeight);", scrollbarElement);			
 			Long presentScrollHeight = (Long)js.executeScript("return arguments[0].scrollHeight",scrollbarElement);
 			
 			if(presentScrollHeight == previousScrollHeight){
@@ -87,8 +164,12 @@ public class GoogleGroupDataCrawler {
 	public void testPageCrawling() throws Exception{
 		setDriverProperty();
 		String url = "https://groups.google.com/forum/#!category-topic/google-admob-ads-sdk/0QDKcvK_nEk";
-		pageDriver = new FirefoxDriver();
-		getPageInformation(url);
+		//String url = "https://groups.google.com/forum/#!category-topic/google-admob-ads-sdk/t2M4n92F0t8";
+		FirefoxOptions  options = new FirefoxOptions();
+		options.addArguments("--headless");
+		pageDriver = new FirefoxDriver(options);
+		getPageInformationII(url);
+		pageDriver.quit();
 	}
 	
 	public static void main(String[] args) throws Exception{
