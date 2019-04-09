@@ -20,7 +20,8 @@ public class GoogleGroupDataCrawler {
 	WebDriver pageDriver = null;
 	
 	public void setDriverProperty() {
-		System.setProperty("webdriver.gecko.driver", "/home/ahsan/Documents/Sail_Research/AndroidDiffCrawler/geckodriver");
+		//System.setProperty("webdriver.gecko.driver", "/home/ahsan/Documents/Sail_Research/AndroidDiffCrawler/geckodriver");
+		System.setProperty("webdriver.gecko.driver", "/home/ahsan/Sail_Workspace/CrawlingAndroidSdkDifference/geckodriver");
 	}
 
 	public List<WebElement> getChangeTableInfo(WebDriver driver, String type) {
@@ -76,6 +77,8 @@ public class GoogleGroupDataCrawler {
 		}*/
 		
 	}
+	
+	
 	
 	public void getPageInformationII(String url) throws Exception{
 		pageDriver.get(url);
@@ -138,16 +141,23 @@ public class GoogleGroupDataCrawler {
 		driver = new FirefoxDriver(options);
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 		driver.get("https://groups.google.com/forum/#!categories/google-admob-ads-sdk");
-		Thread.sleep(1000);
+		Thread.sleep(5000);
 		WebElement scrollbarElement = driver.findElement(By.xpath("/html/body/div[4]/div[5]/div[3]/div/div/div/div[2]/div"));
 		Long previousScrollHeight = 0L;
-		for(int i = 0 ; i <= 1 ; i ++){
-			int threadNo = identifyTotalVisibleThreads();
+		int heightChagneDifference = 0;
+		for(int i = 0 ; i <= 15000 ; i ++){
+			//int threadNo = identifyTotalVisibleThreads();
 			//js.executeAsyncScript(arg0, arg1)
 			js.executeScript("window.scrollTo(0,document.body.scrollHeight)");
 			//js.executeScript("alert('PROBLEM PROBEM')");
 			js.executeScript("arguments[0].scrollBy(0,arguments[0].scrollHeight);", scrollbarElement);			
 			Long presentScrollHeight = (Long)js.executeScript("return arguments[0].scrollHeight",scrollbarElement);
+			
+			if(presentScrollHeight != previousScrollHeight){
+				++heightChagneDifference;
+			}
+			
+			System.out.println("Height: " + presentScrollHeight +" Find difference: " + heightChagneDifference + " " + (heightChagneDifference*30));
 			
 			if(presentScrollHeight == previousScrollHeight){
 				System.out.println("FINISH CRAWLING");
@@ -155,7 +165,7 @@ public class GoogleGroupDataCrawler {
 			}
 			previousScrollHeight = presentScrollHeight;			
 			Thread.sleep(5000);
-			System.out.println("Total Threads " + threadNo);
+			//System.out.println("Total Threads " + threadNo);
 			
 		}
 		
@@ -174,8 +184,8 @@ public class GoogleGroupDataCrawler {
 	
 	public static void main(String[] args) throws Exception{
 		GoogleGroupDataCrawler ob = new GoogleGroupDataCrawler();
-		//ob.crawlingData();
-		ob.testPageCrawling();
+		ob.crawlingData();
+		//ob.testPageCrawling();
 		
 		System.out.println("Program finishes successfully");
 	}
