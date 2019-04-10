@@ -8,7 +8,7 @@ public class GoogleAdMobPostInfo implements Serializable{
 	private String postCreationDate;
 	private String postBody;
 	private String postCreatorName;
-	
+	private String postUrl;
 	/**
 	 * Constcutro
 	 * @param postTitle
@@ -23,6 +23,16 @@ public class GoogleAdMobPostInfo implements Serializable{
 		this.postCreatorName = postCreatorName;
 	}	
 	
+	
+	
+	public String getPostUrl() {
+		return postUrl;
+	}
+
+	public void setPostUrl(String postUrl) {
+		this.postUrl = postUrl;
+	}
+
 	public String getPostTitle() {
 		return postTitle;
 	}

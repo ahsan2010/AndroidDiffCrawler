@@ -27,7 +27,7 @@ import com.csvreader.CsvReader;
 public class GoogleAdMobPostCrawler {
 	
 	WebDriver driver = null;
-	public String ROOT = "/home/ahsan/Documents/SAILLabResearch/Ahsan_Research_Project/GoogleAdMobDiscussion";
+	public String ROOT = "/home/local/SAIL/ahsan/Documents/GoogleAdMobDiscussion";
 	ArrayList<String> postUrlList = new ArrayList<String>();
 	List<String> monthNameList = Arrays.asList("January","February","March","April","May","June","July","August","September","October","November","December");
 	int PostId = 0;
@@ -122,6 +122,7 @@ public class GoogleAdMobPostCrawler {
 			            String formattedDate = formatCreationDate(timeString);
 			            //System.out.println(formattedDate);
 			            GoogleAdMobPostInfo threadInfo = new GoogleAdMobPostInfo(title, element.text(), formattedDate, posterName);
+			            threadInfo.setPostUrl(url);
 			            postThreadList.add(threadInfo);
 			            previous = element.text();
 			        }
@@ -146,13 +147,15 @@ public class GoogleAdMobPostCrawler {
 		return postThreadList;
 	}
 	
+	// R1: 0 - 4999
+	
 	public void crawlPostData() throws Exception{
 		setDriverProperty();
 		FirefoxOptions  options = new FirefoxOptions();
 		options.addArguments("--headless");
 		driver = new FirefoxDriver(options);
 		
-		for(int i = 0 ; i < 100 ; i ++ ){
+		for(int i = 0 ; i < 5000 ; i ++ ){
 			String postUrl = postUrlList.get(i);
 			ArrayList<GoogleAdMobPostInfo> postThreadList = crawlASinglePostInformation(postUrl);
 			writeDataInFile(postThreadList,i);
@@ -178,6 +181,10 @@ public class GoogleAdMobPostCrawler {
 		//xMLStreamWriter.writeStartElement("postThread");
 		
 		xMLStreamWriter.writeStartElement("Question");
+		
+		xMLStreamWriter.writeStartElement("Url");
+		xMLStreamWriter.writeCharacters(questionThread.getPostUrl());
+		xMLStreamWriter.writeEndElement();
 		
 		xMLStreamWriter.writeStartElement("Title");
 		xMLStreamWriter.writeCharacters(questionThread.getPostTitle());
