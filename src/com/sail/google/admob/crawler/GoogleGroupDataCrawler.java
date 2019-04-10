@@ -1,6 +1,8 @@
 package com.sail.google.admob.crawler;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
@@ -14,10 +16,13 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
+import com.csvreader.CsvWriter;
+
 public class GoogleGroupDataCrawler {
 
 	WebDriver driver = null;
 	WebDriver pageDriver = null;
+	Set<String> visiblePostUrls = new HashSet<String>();
 	
 	public void setDriverProperty() {
 		//System.setProperty("webdriver.gecko.driver", "/home/ahsan/Documents/Sail_Research/AndroidDiffCrawler/geckodriver");
@@ -41,20 +46,18 @@ public class GoogleGroupDataCrawler {
 		Thread.sleep(3000);
 		String title = driver.getTitle();
 		System.out.println("Title: " + title);
-		//List<WebElement> visibleThreadElements = driver.findElements(By.xpath("//a[contains(@class, 'F0XO1GC-q-R F0XO1GC-Jb-g')]/@href"));
 		List<WebElement> visibleThreadElements = driver.findElements(By.className("F0XO1GC-q-R"));
+		for(WebElement element : visibleThreadElements){
+			visiblePostUrls.add(element.getAttribute("href"));
+		}
 		System.out.println("Visible Threads : " + visibleThreadElements.size());
 		return visibleThreadElements.size();
-		////*[@id="l_topic_title_8QX41Bdjb1U"]
-		//System.out.println("E: " + visibleThreadElements.getText());
 	}
-	///html/body/div[4]/div[5]/div[3]/div/div/div/div[2]/div
 	
 	public void getPageInformation(String url) throws Exception{
 		pageDriver.get(url);
 		Thread.sleep(3000);
 		JavascriptExecutor js = (JavascriptExecutor) pageDriver;
-		//js.executeScript("return document.getElementsByClassName('F0XO1GC-Db-b').remove();");"F0XO1GC-nb-W F0XO1GC-mb-p"
 		List<WebElement> pageThreads 	= pageDriver.findElements(By.xpath("//div[contains(@class,'F0XO1GC-nb-W F0XO1GC-mb-p')]"));
 		//List<WebElement> pageThreads 	= pageDriver.findElements(By.className("F0XO1GC-nb-P"));
 		System.out.println("SIZE: " + pageThreads.size());
@@ -145,7 +148,7 @@ public class GoogleGroupDataCrawler {
 		WebElement scrollbarElement = driver.findElement(By.xpath("/html/body/div[4]/div[5]/div[3]/div/div/div/div[2]/div"));
 		Long previousScrollHeight = 0L;
 		int heightChagneDifference = 0;
-		for(int i = 0 ; i <= 15000 ; i ++){
+		for(int i = 0 ; heightChagneDifference <= 460 ; i ++){
 			//int threadNo = identifyTotalVisibleThreads();
 			//js.executeAsyncScript(arg0, arg1)
 			js.executeScript("window.scrollTo(0,document.body.scrollHeight)");
@@ -159,18 +162,34 @@ public class GoogleGroupDataCrawler {
 			
 			System.out.println("Height: " + presentScrollHeight +" Find difference: " + heightChagneDifference + " " + (heightChagneDifference*30));
 			
+			if(heightChagneDifference == 450){
+				int numberThreads = identifyTotalVisibleThreads();
+				System.out.println("Total threads: ["+numberThreads+"]");
+				writeUrlInformation();
+				break;
+			}		
 			if(presentScrollHeight == previousScrollHeight){
 				System.out.println("FINISH CRAWLING");
 				break;
 			}
 			previousScrollHeight = presentScrollHeight;			
 			Thread.sleep(5000);
-			//System.out.println("Total Threads " + threadNo);
 			
 		}
 		
 	}
 	
+	public void writeUrlInformation() throws Exception{
+		System.out.println("Total visible post urls ["+visiblePostUrls.size()+"]");
+		CsvWriter writer = new CsvWriter("/home/ahsan/Documents/SAILLabResearch/Ahsan_Research_Project/GoogleAdMobDiscussion/Data/postUrl.csv");
+		writer.write("Post_Url");
+		writer.endRecord();
+		for(String postLink : visiblePostUrls){
+			writer.write(postLink);
+			writer.endRecord();
+		}
+		writer.close();		
+	}	
 	public void testPageCrawling() throws Exception{
 		setDriverProperty();
 		String url = "https://groups.google.com/forum/#!category-topic/google-admob-ads-sdk/0QDKcvK_nEk";
@@ -185,8 +204,6 @@ public class GoogleGroupDataCrawler {
 	public static void main(String[] args) throws Exception{
 		GoogleGroupDataCrawler ob = new GoogleGroupDataCrawler();
 		ob.crawlingData();
-		//ob.testPageCrawling();
-		
 		System.out.println("Program finishes successfully");
 	}
 }
